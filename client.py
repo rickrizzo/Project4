@@ -2,7 +2,7 @@ import socket
 import sys
 
 #Variables
-host = ''
+host = 'localhost'
 port = 8765
 
 #Create Socket
@@ -20,16 +20,15 @@ except socket.gaierror:
 	print("Host could not be resolved")
 	sys.exit()
 s.connect((remote_ip, port))
-print "Connected to ", host, " on IP ", remote_ip
+print "Connected to", host, "on IP", remote_ip
 
 #Send Data
 while True:
 	try:
 		command = raw_input("Enter a command: ")
 		#Upload Files
-		if(command.split(' ')[0] == "STORE" && len(command.split(' ')) == 3) {
+		#if(command.split(' ')[0] == "STORE" and len(command.split(' ')) == 3):
 
-		}
 		s.send(command + "\n")
 	except socket.error:
 		print "Send failed"

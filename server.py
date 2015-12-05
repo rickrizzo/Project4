@@ -8,6 +8,7 @@ from thread import *
 HOST = ''
 PORT = 8765
 
+#Storage Information
 n_blocks = 128
 blocksize = 4096
 
@@ -28,28 +29,19 @@ s.listen(10)
 print "Socket listening"
 
 #Create Directory
-
 if os.path.exists('.storage'):
 	shutil.rmtree('.storage')
-else:
-	os.makedirs('.storage')
+os.makedirs('.storage')
 
 #Handle Connections
 def clientthread(conn):
-	
-	#Connections
 	while True:
-
 		#Recieve
-		print "Block size is " + str(n_blocks)
-		print "Number of blocks is " + str(blocksize)
-		print "Listening on port " + str(PORT)
 		data = conn.recv(1024)
 
+		#Recive Data
 		if not data:
 			break
-
-		#Recieve Data
 		print "[thread ] Rcvd: ", data.split(' ')
 
 		#Variables
@@ -86,7 +78,9 @@ def clientthread(conn):
 #Create Threads
 while 1:
 	conn, addr = s.accept()
-	print "Connected with ", addr[0], ":", str(addr[1])
+	print "Block size is " + str(n_blocks)
+	print "Number of blocks is " + str(blocksize)
+	print "Received incoming connection from ", addr[0], ":", str(addr[1])
 	start_new_thread(clientthread, (conn,))
 
 #Close Socket
