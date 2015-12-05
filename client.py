@@ -3,7 +3,7 @@ import sys
 
 #Variables
 host = ''
-port = 9999
+port = 8765
 
 #Create Socket
 try:
@@ -26,7 +26,11 @@ print "Connected to ", host, " on IP ", remote_ip
 while True:
 	try:
 		command = raw_input("Enter a command: ")
-		s.send(command)
+		#Upload Files
+		if(command.split(' ')[0] == "STORE" && len(command.split(' ')) == 3) {
+
+		}
+		s.send(command + "\n")
 	except socket.error:
 		print "Send failed"
 		sys.exit()

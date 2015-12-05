@@ -1,10 +1,12 @@
 import socket
 import sys
+import os
+import shutil
 from thread import *
 
 #Server Information
 HOST = ''
-PORT = 9999
+PORT = 8765
 
 n_blocks = 128
 blocksize = 4096
@@ -17,13 +19,20 @@ print "Socket created"
 try:
 	s.bind((HOST, PORT))
 except socket.error as msg:
-	print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
+	print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message: ' + msg[1]
 	sys.exit()
 print "Socket bind complete"
 
 #Listen
 s.listen(10)
 print "Socket listening"
+
+#Create Directory
+
+if os.path.exists('.storage'):
+	shutil.rmtree('.storage')
+else:
+	os.makedirs('.storage')
 
 #Handle Connections
 def clientthread(conn):
@@ -39,8 +48,34 @@ def clientthread(conn):
 
 		if not data:
 			break
-		print "[thread ", current_thread(), "] Recieved: ", data
-		reply = "Okay..." + str(data)
+
+		#Recieve Data
+		print "[thread ] Rcvd: ", data.split(' ')
+
+		#Variables
+		command = data.split(' ')
+		reply = "Invalid command " + data;
+
+		####Handle Commands###
+		#Store File
+		if command[0] == "STORE":
+			if len(command) == 3:
+				reply = "STORE FILE"
+
+		#Read File
+		if command[0] == "READ":
+			if len(command) == 4:
+				reply = "READ FILE"
+
+		#Delete File
+		if command[0] == "DELETE":
+			if len(command) == 2:
+				reply = "DELETE FILE"
+
+		#Print Directory
+		if command[0] == "DIR\n":
+			if len(command) == 1:
+				reply = "PRINT DIR"
 
 		#Reply
 		conn.send(reply)
