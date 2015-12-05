@@ -6,6 +6,9 @@ from thread import *
 HOST = ''
 PORT = 9999
 
+n_blocks = 128
+blocksize = 4096
+
 #Create Socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print "Socket created"
@@ -29,7 +32,15 @@ def clientthread(conn):
 	while True:
 
 		#Recieve
+		print "Block size is " + str(n_blocks)
+		print "Number of blocks is " + str(blocksize)
+		print "Listening on port " + str(PORT)
 		data = conn.recv(1024)
+<<<<<<< HEAD
+		
+		reply = "Okay..." + str(data)
+=======
+>>>>>>> refs/remotes/origin/master
 		if not data:
 			break
 		print "[thread ", current_thread(), "] Recieved: ", data
