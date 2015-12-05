@@ -19,17 +19,15 @@ try:
 except socket.error as msg:
 	print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
 	sys.exit()
-print("Socket bind complete")
+print "Socket bind complete"
 
 #Listen
 s.listen(10)
-print("Socket listening")
+print "Socket listening"
 
 #Handle Connections
 def clientthread(conn):
-	#Welcome
-	conn.send("Welcome to the server. Type something and hit enter\n")
-
+	
 	#Connections
 	while True:
 
@@ -38,13 +36,18 @@ def clientthread(conn):
 		print "Number of blocks is " + str(blocksize)
 		print "Listening on port " + str(PORT)
 		data = conn.recv(1024)
+<<<<<<< HEAD
 		
 		reply = "Okay..." + str(data)
+=======
+>>>>>>> refs/remotes/origin/master
 		if not data:
 			break
+		print "[thread ", current_thread(), "] Recieved: ", data
+		reply = "Okay..." + str(data)
 
 		#Reply
-		conn.sendall(reply)
+		conn.send(reply)
 
 	#Close
 	conn.close()
@@ -52,7 +55,7 @@ def clientthread(conn):
 #Create Threads
 while 1:
 	conn, addr = s.accept()
-	print("Connected with ", addr[0], ":", str(addr[1]))
+	print "Connected with ", addr[0], ":", str(addr[1])
 	start_new_thread(clientthread, (conn,))
 
 #Close Socket
