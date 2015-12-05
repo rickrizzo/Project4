@@ -36,11 +36,7 @@ def clientthread(conn):
 		print "Number of blocks is " + str(blocksize)
 		print "Listening on port " + str(PORT)
 		data = conn.recv(1024)
-<<<<<<< HEAD
-		
-		reply = "Okay..." + str(data)
-=======
->>>>>>> refs/remotes/origin/master
+
 		if not data:
 			break
 		print "[thread ", current_thread(), "] Recieved: ", data
