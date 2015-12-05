@@ -1,6 +1,6 @@
 import socket
 import sys
-from thread import *
+from _thread import *
 
 #Server Information
 HOST = ''
@@ -14,7 +14,7 @@ print("Socket created")
 try:
 	s.bind((HOST, PORT))
 except socket.error as msg:
-	print("Bind failed. Error Code : ", str(msg[0]), ' Message ', msg[1])
+	print("Bind failed", str(msg))
 	sys.exit()
 print("Socket bind complete")
 
@@ -25,19 +25,21 @@ print("Socket listening")
 #Handle Connections
 def clientthread(conn):
 	#Welcome
-	conn.send("Welcome to the server. Type something and hit enter\n")
+	message = "Welcome to the server. Type something and hit enter\n"
+	message = message.encode('utf-8')
+	conn.send(message)
 
 	#Connections
 	while True:
 
 		#Recieve
 		data = conn.recv(1024)
-		reply = "Okay..." + data
+		reply = "Okay..." + str(data)
 		if not data:
 			break
 
 		#Reply
-		conn.sendall(reply)
+		conn.sendall(reply.encode('utf-8'))
 
 	#Close
 	conn.close()
