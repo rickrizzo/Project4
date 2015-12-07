@@ -26,10 +26,14 @@ print "Connected to", host, "on IP", remote_ip
 while True:
 	try:
 		command = raw_input("Enter a command: ")
+		
 		#Upload Files
-		#if(command.split(' ')[0] == "STORE" and len(command.split(' ')) == 3):
-
-		s.send(command + "\n")
+		if(command.split(' ')[0] == "STORE" and len(command.split(' ')) == 3):
+			print "STORE COMMAND FROM CLIENT"
+			s.send(command)
+			s.send(open('binary', 'rb').read())
+		else:
+			s.send(command)
 	except socket.error:
 		print "Send failed"
 		sys.exit()

@@ -39,20 +39,32 @@ def clientthread(conn):
 		#Recieve
 		data = conn.recv(1024)
 
+		#If Client Quit
+		if(len(data) == 0):
+			print "Client closed its socket...terminating"
+			break
+
 		#Recive Data
 		if not data:
 			break
-		print "[thread ] Rcvd: ", data.split(' ')
+		print "[thread ] Rcvd: ", data.rstrip('\n')
 
 		#Variables
-		command = data.split(' ')
+		command = data.rstrip('\n').split(' ')
 		reply = "Invalid command " + data;
 
-		####Handle Commands###
 		#Store File
 		if command[0] == "STORE":
 			if len(command) == 3:
 				reply = "STORE FILE"
+				clientFile = conn.recv(int(command[2]))
+				f = open('.storage/' + command[1], 'w+')
+				f.write(clientFile)
+				f.close()
+				reply = "FILE STORAGE COMPLETE"
+				#http://stackoverflow.com/questions/19412029/transfering-file-over-tcp-using-python
+				#send file length beforehand?
+				#call conn.recv again to get file right?
 
 		#Read File
 		if command[0] == "READ":
@@ -65,7 +77,7 @@ def clientthread(conn):
 				reply = "DELETE FILE"
 
 		#Print Directory
-		if command[0] == "DIR\n":
+		if command[0] == "DIR":
 			if len(command) == 1:
 				reply = "PRINT DIR"
 
