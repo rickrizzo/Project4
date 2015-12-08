@@ -2,9 +2,13 @@ import socket
 import sys
 import os
 import shutil
+import math
 from thread import *
 from sys import stdout
-import math
+
+#ToDo
+#Rob - Dir, Read, Thread IDs
+#Harrison - Delete, Memory, 
 
 #Server Information
 HOST = ''
