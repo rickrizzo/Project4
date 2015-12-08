@@ -48,8 +48,6 @@ if os.path.exists('.storage'):
 	shutil.rmtree('.storage')
 os.makedirs('.storage')
 
-#Handle Connections
-def clientthread(conn):
 #prints memory nice and pretty
 def printmem():
 	for i in eqln:
@@ -151,9 +149,6 @@ def clientthread(conn):
 				f.write(clientFile)
 				f.close()
 				reply = "FILE STORAGE COMPLETE"
-				#http://stackoverflow.com/questions/19412029/transfering-file-over-tcp-using-python
-				#send file length beforehand?
-				#call conn.recv again to get file right?
 
 		#Read File
 		if command[0] == "READ":
