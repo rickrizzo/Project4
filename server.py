@@ -68,9 +68,6 @@ def printmem():
 
 #stores data, currently only simulates this
 def store(cmdln):
-	if len(cmdln) != 3:
-		conn.send("ERROR: invalid STORE usage\n STORE syntax: STORE <filename> <bytes>\\n<file-contents>\n")
-		return
 	i = num_written = prevpos = openb = 0
 	clusters = 1
 	curchar = 65
@@ -94,13 +91,18 @@ def store(cmdln):
 		conn.send("ERROR: FILE EXISTS\n")
 		return
 	else:
+		#receives and writes file to disk
+		# clientFile = conn.recv(int(cmdln[2]))
+		# f = open('.storage/' + cmdln[1], 'w+')
+		# f.write(clientFile)
+		# f.close()
+		
 		#enters the file into simulated memory
 		fnames.update({str(fname):chr(curchar)})
 		while num_written < blocks:
 			#determines if memory can be written to this location
 			if simmem[i] == '.':
 				simmem[i] = chr(curchar)
-				print chr(curchar)
 				num_written+=1
 				prevpos = i
 			#determines if another cluster has been used
@@ -114,10 +116,27 @@ def store(cmdln):
 			Print(" clusters)\n")
 		Print("[thread " + "1" + "] Simulated Clustered Disk Space Allocation:\n")
 		printmem()
+		
+		
 		conn.send("ACK\n")
 		Print("[thread " + "1" + "] Sent: ACK\n")
 	
-
+#deletes data
+def delete(cmdln):
+	if not cmdln[1] in fnames.keys():
+		conn.send("ERROR: NO SUCH FILE\n")
+		return
+	
+	for i in range(len(simmem)):
+		if simmem[i] == fnames[cmdln[1]]:
+			simmem[i] = '.'
+	
+	del fnames[cmdln[1]]
+	Print("[thread " + "1" + "] Simulated Clustered Disk Space Allocation:\n")
+	printmem()
+	conn.send("ACK\n")
+	Print("[thread " + "1" + "] Sent: ACK\n")
+	
 #Handle Connections
 def clientthread(conn):
 	
@@ -147,12 +166,9 @@ def clientthread(conn):
 		#Store File
 		if command[0] == "STORE":
 			if len(command) == 3:
-				reply = "STORE FILE"
-				clientFile = conn.recv(int(command[2]))
-				f = open('.storage/' + command[1], 'w+')
-				f.write(clientFile)
-				f.close()
-				reply = "FILE STORAGE COMPLETE"
+				store(command)
+			else:
+				reply = "ERROR: invalid STORE usage\n STORE syntax: STORE <filename> <bytes>\\n<file-contents>\n"
 
 		#Read File
 		if command[0] == "READ":
@@ -162,8 +178,10 @@ def clientthread(conn):
 		#Delete File
 		if command[0] == "DELETE":
 			if len(command) == 2:
-				reply = "DELETE FILE"
-
+				delete(command)
+			else:
+				reply = "ERROR: invalid DELETE usage\n DELETE syntax: DELETE <filename>\n"
+				
 		#Print Directory
 		if command[0] == "DIR":
 			if len(command) == 1:
