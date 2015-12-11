@@ -3,11 +3,11 @@ import sys
 import os
 import shutil
 import math
-from thread import *
+import threading
 from sys import stdout
 
 #ToDo
-#Rob - Dir, Read, Thread IDs
+#Rob - Read
 #Harrison - Delete, Memory, 
 
 #Server Information
@@ -121,10 +121,6 @@ def store(cmdln):
 #Handle Connections
 def clientthread(conn):
 	
-	print "Block size is " + str(n_blocks)
-	print "Number of blocks is " + str(blocksize)
-	print "Listening on port " + str(PORT)
-	
 	#Connections
 	while True:
 		#Recieve
@@ -138,7 +134,7 @@ def clientthread(conn):
 		#Recive Data
 		if not data:
 			break
-		print "[thread ] Rcvd: ", data.rstrip('\n')
+		print "[thread", threading.current_thread().ident, "] Rcvd: ", data.rstrip('\n')
 
 		#Variables
 		command = data.rstrip('\n').split(' ')
@@ -181,7 +177,7 @@ while 1:
 	print "Block size is " + str(n_blocks)
 	print "Number of blocks is " + str(blocksize)
 	print "Received incoming connection from ", addr[0], ":", str(addr[1])
-	start_new_thread(clientthread, (conn,))
+	threading.Thread(target= clientthread, args= (conn, )).start()
 
 #Close Socket
 s.close()
