@@ -92,10 +92,10 @@ def store(cmdln):
 		return
 	else:
 		#receives and writes file to disk
-		# clientFile = conn.recv(int(cmdln[2]))
-		# f = open('.storage/' + cmdln[1], 'w+')
-		# f.write(clientFile)
-		# f.close()
+		#clientFile = conn.recv(int(cmdln[2]))
+		#f = open('.storage/' + cmdln[1], 'w+')
+		#f.write(clientFile)
+		#f.close()
 		
 		#enters the file into simulated memory
 		fnames.update({str(fname):chr(curchar)})
@@ -169,7 +169,15 @@ def clientthread(conn):
 		#Read File
 		if command[0] == "READ":
 			if len(command) == 4:
-				reply = "READ FILE"
+				if(fname.has_key(command[1])):
+					reply = "FOUND!"
+					fRead = open('.storage/' + command[1])
+					print fRead.read()
+					#command[3] = where to start reading from file
+					#command[4] = how much of the file to read
+					#Access file in directory and then take this out
+				else:
+					reply = "ERROR: file not found"
 
 		#Delete File
 		if command[0] == "DELETE":
