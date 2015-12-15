@@ -128,6 +128,7 @@ def store(cmdln):
 	
 #deletes data
 def delete(cmdln):
+	numdel = 0
 	if not cmdln[1] in fnames.keys():
 		conn.send("ERROR: NO SUCH FILE\n")
 		return
@@ -135,8 +136,13 @@ def delete(cmdln):
 	for i in range(len(simmem)):
 		if simmem[i] == fnames[cmdln[1]]:
 			simmem[i] = '.'
+			numdel+=1
 	
-	PRINT("Deleted " + cmdln[1] + " file '" + fnames[cmdln[1]] + "' (deallocated X blocks)")
+	Print("[thread " + str(threading.current_thread().ident) + "] Deleted " + cmdln[1] + " file '" + fnames[cmdln[1]] + "' (deallocated "+ str(numdel))
+	if numdel == 1:
+		Print(" block\n")
+	else:
+		Print(" blocks)\n")
 	del fnames[cmdln[1]]
 	Print("[thread " + str(threading.current_thread().ident) + "] Simulated Clustered Disk Space Allocation:\n")
 	printmem()
@@ -181,7 +187,6 @@ def clientthread(conn):
 				store(command)
 				reply = "ACK\n"
 			else:
-				conn.send("WRONG")
 				reply = "ERROR: INVALID STORE USAGE\nEX: STORE <filename> <bytes>\\n<file-contents>\n"
 
 		#Read File
@@ -199,7 +204,7 @@ def clientthread(conn):
 				else:
 					reply = "ERROR: NO SUCH FILE\n"
 			else:
-				reply = "ERROR: INVALID READ USAGE\nEX: READ <filename> <byte-offset> <length>"
+				reply = "ERROR: INVALID READ USAGE\nEX: READ <filename> <byte-offset> <length>\n"
 
 		#Delete File
 		if command[0] == "DELETE":
