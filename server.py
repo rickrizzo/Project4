@@ -12,7 +12,7 @@ from sys import stdout
 
 #Server Information
 HOST = ''
-PORT = 8764
+PORT = 8765
 
 #Storage Information
 n_blocks = 128
@@ -69,7 +69,7 @@ def printmem():
 #stores data, currently only simulates this
 def store(cmdln):
 	if len(cmdln) != 3:
-		conn.send("ERROR: invalid STORE usage\n STORE syntax: STORE <filename> <bytes>\\n<file-contents>\n")
+		conn.send("ERROR: INVLAID STORE USEAGE\nEX: STORE <filename> <bytes>\\n<file-contents>\n")
 
 	i = num_written = openb = 0
 	clusters = 0
@@ -88,7 +88,7 @@ def store(cmdln):
 		curchar+=1
 
 	if blocks > openb:
-		conn.send("ERROR: not enough storage\n")
+		conn.send("ERROR: NOT ENOUGH STORAGE\n")
 		return
 	
 	if fnames.has_key(fname):
@@ -124,9 +124,6 @@ def store(cmdln):
 			Print(" clusters)\n")
 		Print("[thread " + str(threading.current_thread().ident) + "] Simulated Clustered Disk Space Allocation:\n")
 		printmem()
-		
-		
-		conn.send("ACK\n")
 		Print("[thread " + str(threading.current_thread().ident) + "] Sent: ACK\n")
 	
 #deletes data
@@ -139,10 +136,10 @@ def delete(cmdln):
 		if simmem[i] == fnames[cmdln[1]]:
 			simmem[i] = '.'
 	
+	PRINT("Deleted " + cmdln[1] + " file '" + fnames[cmdln[1]] + "' (deallocated X blocks)")
 	del fnames[cmdln[1]]
 	Print("[thread " + str(threading.current_thread().ident) + "] Simulated Clustered Disk Space Allocation:\n")
 	printmem()
-	conn.send("ACK\n")
 	Print("[thread " + str(threading.current_thread().ident) + "] Sent: ACK\n")
 	
 def Dir():
@@ -152,10 +149,9 @@ def Dir():
 		msg = ""
 		for i in names:
 			msg+=str(i)+"\n"
-		print msg
-		conn.send(msg)
+		return str(len(names)) + "\n" + msg
 	else:
-		conn.send("0\n");
+		return "0\n";
 	
 #Handle Connections
 def clientthread(conn):
@@ -209,13 +205,14 @@ def clientthread(conn):
 		if command[0] == "DELETE":
 			if len(command) == 2:
 				delete(command)
+				reply = "ACK\n"
 			else:
 				reply = "ERROR: invalid DELETE usage\n DELETE syntax: DELETE <filename>\n"
 				
 		#Print Directory
 		if command[0] == "DIR":
 			if len(command) == 1:
-				Dir()
+				reply = Dir()
 			else:
 				reply = "ERROR: invalid DIR usage\n DIR syntax: DIR\n"
 
