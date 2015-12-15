@@ -29,9 +29,10 @@ while True:
 		
 		#Upload Files
 		if(command.split(' ')[0] == "STORE"):
-			print "STORE COMMAND FROM CLIENT"
 			s.send(command)
-			s.send(open(command.split(' ')[1], 'rb').read())
+			fileSend = open(command.split(' ')[1], 'rb')
+			s.send(fileSend.read())
+			fileSend.close()
 		else:
 			s.send(command)
 	except socket.error:

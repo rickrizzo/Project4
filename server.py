@@ -160,22 +160,27 @@ def clientthread(conn):
 		if command[0] == "STORE":
 			if len(command) == 3:
 				store(command)
-				reply = "ACK"
+				reply = "ACK\n"
 			else:
-				reply = "ERROR: invalid STORE usage\n STORE syntax: STORE <filename> <bytes>\\n<file-contents>\n"
+				conn.send("WRONG")
+				reply = "ERROR: INVALID STORE USAGE\nEX: STORE <filename> <bytes>\\n<file-contents>\n"
 
 		#Read File
 		if command[0] == "READ":
 			if len(command) == 4:
-				if(fnames.has_key(command[1])):
-					fRead = open('.storage/' + command[1])
-					reply = fRead.read()
-					fRead.close()
-					#command[3] = where to start reading from file
-					#command[4] = how much of the file to read
-					#Access file in directory and then take this out
+				if fnames.has_key(command[1]):
+					if (int(command[2]) + int(command[3])) <= os.path.getsize('.storage/' + command[1]):
+						fRead = open('.storage/' + command[1])
+						fRead.read(int(command[2]))
+						contents = fRead.read(int(command[3]))
+						reply = "ACK " + command[3] + "\n" + contents;
+						fRead.close()
+					else:
+						reply = "ERROR: INVALID BYTE RANGE\n"
 				else:
 					reply = "ERROR: NO SUCH FILE\n"
+			else:
+				reply = "ERROR: INVALID READ USAGE\nEX: READ <filename> <byte-offset> <length>"
 
 		#Delete File
 		if command[0] == "DELETE":
