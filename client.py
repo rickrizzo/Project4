@@ -28,10 +28,11 @@ while True:
 		command = raw_input("Enter a command: ")
 		
 		#Upload Files
-		if(command.split(' ')[0] == "STORE" and len(command.split(' ')) == 3):
-			print "STORE COMMAND FROM CLIENT"
+		if(command.split(' ')[0] == "STORE"):
 			s.send(command)
-			s.send(open('binary', 'rb').read())
+			fileSend = open(command.split(' ')[1], 'rb')
+			s.send(fileSend.read())
+			fileSend.close()
 		else:
 			s.send(command)
 	except socket.error:

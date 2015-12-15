@@ -71,7 +71,7 @@ def store(cmdln):
 	if len(cmdln) != 3:
 		conn.send("ERROR: invalid STORE usage\n STORE syntax: STORE <filename> <bytes>\\n<file-contents>\n")
 
-	i = num_written = prevpos = openb = 0
+	i = num_written = openb = 0
 	clusters = 0
 	curchar = 65
 	flag = False
@@ -96,10 +96,10 @@ def store(cmdln):
 		return
 	else:
 		#receives and writes file to disk
-		# clientFile = conn.recv(int(cmdln[2]))
-		# f = open('.storage/' + cmdln[1], 'w+')
-		# f.write(clientFile)
-		# f.close()
+		clientFile = conn.recv(int(cmdln[2]))
+		f = open('.storage/' + cmdln[1], 'w+')
+		f.write(clientFile)
+		f.close()
 		
 		#enters the file into simulated memory
 		fnames.update({str(fname):chr(curchar)})
@@ -108,7 +108,6 @@ def store(cmdln):
 			if simmem[i] == '.':
 				simmem[i] = chr(curchar)
 				num_written+=1
-				prevpos = i
 			i+=1
 		#determines if another cluster has been used
 		for i in simmem:
@@ -184,13 +183,27 @@ def clientthread(conn):
 		if command[0] == "STORE":
 			if len(command) == 3:
 				store(command)
+				reply = "ACK\n"
 			else:
-				reply = "ERROR: invalid STORE usage\n STORE syntax: STORE <filename> <bytes>\\n<file-contents>\n"
+				conn.send("WRONG")
+				reply = "ERROR: INVALID STORE USAGE\nEX: STORE <filename> <bytes>\\n<file-contents>\n"
 
 		#Read File
 		if command[0] == "READ":
 			if len(command) == 4:
-				reply = "READ FILE"
+				if fnames.has_key(command[1]):
+					if (int(command[2]) + int(command[3])) <= os.path.getsize('.storage/' + command[1]):
+						fRead = open('.storage/' + command[1])
+						fRead.read(int(command[2]))
+						contents = fRead.read(int(command[3]))
+						reply = "ACK " + command[3] + "\n" + contents;
+						fRead.close()
+					else:
+						reply = "ERROR: INVALID BYTE RANGE\n"
+				else:
+					reply = "ERROR: NO SUCH FILE\n"
+			else:
+				reply = "ERROR: INVALID READ USAGE\nEX: READ <filename> <byte-offset> <length>"
 
 		#Delete File
 		if command[0] == "DELETE":
