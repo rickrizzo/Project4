@@ -12,7 +12,7 @@ from sys import stdout
 
 #Server Information
 HOST = ''
-PORT = 8765
+PORT = 8764
 
 #Storage Information
 n_blocks = 128
@@ -68,9 +68,13 @@ def printmem():
 
 #stores data, currently only simulates this
 def store(cmdln):
+	if len(cmdln) != 3:
+		conn.send("ERROR: invalid STORE usage\n STORE syntax: STORE <filename> <bytes>\\n<file-contents>\n")
+
 	i = num_written = prevpos = openb = 0
-	clusters = 1
+	clusters = 0
 	curchar = 65
+	flag = False
 	fname = cmdln[1]
 	fsize = float(cmdln[2])
 	blocks = int(math.ceil(fsize / blocksize))
@@ -105,21 +109,26 @@ def store(cmdln):
 				simmem[i] = chr(curchar)
 				num_written+=1
 				prevpos = i
-			#determines if another cluster has been used
-			if (prevpos) != (i):
-				clusters+=1
 			i+=1
-		Print("[thread " + "1" + "] Stored file '" + chr(curchar) + "' (" + str(int(fsize)) + " bytes; " + str(blocks) + " blocks; " + str(clusters))
+		#determines if another cluster has been used
+		for i in simmem:
+			if i == chr(curchar) and not flag:
+				clusters+=1
+				flag = True
+			elif i != chr(curchar):
+				flag = False
+
+		Print("[thread " + str(threading.current_thread().ident) + "] Stored file '" + chr(curchar) + "' (" + str(int(fsize)) + " bytes; " + str(blocks) + " blocks; " + str(clusters))
 		if clusters == 1:
 			Print(" cluster)\n")
 		else:
 			Print(" clusters)\n")
-		Print("[thread " + "1" + "] Simulated Clustered Disk Space Allocation:\n")
+		Print("[thread " + str(threading.current_thread().ident) + "] Simulated Clustered Disk Space Allocation:\n")
 		printmem()
 		
 		
 		conn.send("ACK\n")
-		Print("[thread " + "1" + "] Sent: ACK\n")
+		Print("[thread " + str(threading.current_thread().ident) + "] Sent: ACK\n")
 	
 #deletes data
 def delete(cmdln):
@@ -132,10 +141,22 @@ def delete(cmdln):
 			simmem[i] = '.'
 	
 	del fnames[cmdln[1]]
-	Print("[thread " + "1" + "] Simulated Clustered Disk Space Allocation:\n")
+	Print("[thread " + str(threading.current_thread().ident) + "] Simulated Clustered Disk Space Allocation:\n")
 	printmem()
 	conn.send("ACK\n")
-	Print("[thread " + "1" + "] Sent: ACK\n")
+	Print("[thread " + str(threading.current_thread().ident) + "] Sent: ACK\n")
+	
+def Dir():
+	names = fnames.keys()
+	if len(names):
+		names.sort()
+		msg = ""
+		for i in names:
+			msg+=str(i)+"\n"
+		print msg
+		conn.send(msg)
+	else:
+		conn.send("0\n");
 	
 #Handle Connections
 def clientthread(conn):
@@ -153,7 +174,7 @@ def clientthread(conn):
 		#Recive Data
 		if not data:
 			break
-		print "[thread", threading.current_thread().ident, "] Rcvd: ", data.rstrip('\n')
+		Print( "[thread " + str(threading.current_thread().ident) + "] Rcvd: " + data.rstrip('\n') + "\n")
 
 		#Variables
 		command = data.rstrip('\n').split(' ')
@@ -181,7 +202,9 @@ def clientthread(conn):
 		#Print Directory
 		if command[0] == "DIR":
 			if len(command) == 1:
-				reply = "PRINT DIR"
+				Dir()
+			else:
+				reply = "ERROR: invalid DIR usage\n DIR syntax: DIR\n"
 
 		#Reply
 		conn.send(reply)
