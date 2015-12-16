@@ -4,6 +4,7 @@ import os
 import shutil
 import math
 import threading
+import binascii
 from sys import stdout
 
 #ToDo
@@ -18,10 +19,11 @@ PORT = 8765
 n_blocks = 128
 blocksize = 4096
 simmem = []
-#dict to track names currently used
 fnames = {}
-#print on one line without spaces
+
+#System Variables
 Print = sys.stdout.write
+mutex = threading.Lock()
 
 #the below initializes the simulated memory
 for i in range(n_blocks):
@@ -69,7 +71,7 @@ def printmem():
 #stores data, currently only simulates this
 def store(cmdln):
 	if len(cmdln) != 3:
-		conn.send("ERROR: INVLAID STORE USEAGE\nEX: STORE <filename> <bytes>\\n<file-contents>\n")
+		return "ERROR: INVLAID STORE USEAGE\nEX: STORE <filename> <bytes>\\n<file-contents>\n"
 
 	i = num_written = openb = 0
 	clusters = 0
@@ -87,51 +89,61 @@ def store(cmdln):
 	while chr(curchar) in fnames.values():
 		curchar+=1
 
+	#Check Files
 	if blocks > openb:
-		conn.send("ERROR: NOT ENOUGH STORAGE\n")
-		return
+		return "ERROR: NOT ENOUGH STORAGE\n"
 	
 	if fnames.has_key(fname):
-		conn.send("ERROR: FILE EXISTS\n")
-		return
-	else:
-		#receives and writes file to disk
-		clientFile = conn.recv(int(cmdln[2]))
-		f = open('.storage/' + cmdln[1], 'w+')
-		f.write(clientFile)
-		f.close()
-		
-		#enters the file into simulated memory
-		fnames.update({str(fname):chr(curchar)})
-		while num_written < blocks:
-			#determines if memory can be written to this location
-			if simmem[i] == '.':
-				simmem[i] = chr(curchar)
-				num_written+=1
-			i+=1
-		#determines if another cluster has been used
-		for i in simmem:
-			if i == chr(curchar) and not flag:
-				clusters+=1
-				flag = True
-			elif i != chr(curchar):
-				flag = False
+		return "ERROR: FILE EXISTS\n"
 
-		Print("[thread " + str(threading.current_thread().ident) + "] Stored file '" + chr(curchar) + "' (" + str(int(fsize)) + " bytes; " + str(blocks) + " blocks; " + str(clusters))
-		if clusters == 1:
-			Print(" cluster)\n")
-		else:
-			Print(" clusters)\n")
-		Print("[thread " + str(threading.current_thread().ident) + "] Simulated Clustered Disk Space Allocation:\n")
-		printmem()
-		Print("[thread " + str(threading.current_thread().ident) + "] Sent: ACK\n")
+	#Lock
+	mutex.acquire()
+	
+	#receives and writes file to disk
+	clientFile = conn.recv(int(cmdln[2]))
+
+	if len(clientFile) == 0:
+		mutex.release()
+		return "ERROR: NO FILE RECIEVED"
+
+	f = open('.storage/' + cmdln[1], 'w+')
+	f.write(clientFile)
+	f.close()
+	
+	#enters the file into simulated memory
+	fnames.update({str(fname):chr(curchar)})
+	while num_written < blocks:
+		#determines if memory can be written to this location
+		if simmem[i] == '.':
+			simmem[i] = chr(curchar)
+			num_written+=1
+		i+=1
+	#determines if another cluster has been used
+	for i in simmem:
+		if i == chr(curchar) and not flag:
+			clusters+=1
+			flag = True
+		elif i != chr(curchar):
+			flag = False
+
+	Print("[thread " + str(threading.current_thread().ident) + "] Stored file '" + chr(curchar) + "' (" + str(int(fsize)) + " bytes; " + str(blocks) + " blocks; " + str(clusters))
+	if clusters == 1:
+		Print(" cluster)\n")
+	else:
+		Print(" clusters)\n")
+	Print("[thread " + str(threading.current_thread().ident) + "] Simulated Clustered Disk Space Allocation:\n")
+	printmem()
+	Print("[thread " + str(threading.current_thread().ident) + "] Sent: ACK\n")
+
+	#Release
+	mutex.release()
+	return "ACK\n"
 	
 #deletes data
 def delete(cmdln):
 	numdel = 0
 	if not cmdln[1] in fnames.keys():
-		conn.send("ERROR: NO SUCH FILE\n")
-		return
+		return "ERROR: NO SUCH FILE\n"
 	
 	for i in range(len(simmem)):
 		if simmem[i] == fnames[cmdln[1]]:
@@ -147,6 +159,7 @@ def delete(cmdln):
 	Print("[thread " + str(threading.current_thread().ident) + "] Simulated Clustered Disk Space Allocation:\n")
 	printmem()
 	Print("[thread " + str(threading.current_thread().ident) + "] Sent: ACK\n")
+	return "ACK\n"
 	
 def Dir():
 	names = fnames.keys()
@@ -184,8 +197,7 @@ def clientthread(conn):
 		#Store File
 		if command[0] == "STORE":
 			if len(command) == 3:
-				store(command)
-				reply = "ACK\n"
+				reply = store(command)
 			else:
 				reply = "ERROR: INVALID STORE USAGE\nEX: STORE <filename> <bytes>\\n<file-contents>\n"
 

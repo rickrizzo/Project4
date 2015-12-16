@@ -1,5 +1,6 @@
 import socket
 import sys
+import os
 
 #Variables
 host = 'localhost'
@@ -21,6 +22,8 @@ except socket.gaierror:
 	sys.exit()
 s.connect((remote_ip, port))
 print "Connected to", host, "on IP", remote_ip
+
+print "the image file has ", os.path.getsize('test.png'), " bytes"
 
 #Send Data
 while True:
