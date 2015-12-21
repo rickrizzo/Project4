@@ -98,9 +98,27 @@ Allocation Algorithms
 - Next Fit  
 
 ####Noncontiguous Memory
+Subject to internal fragmentation  
+Allocation Algorithms
+- FIFO or first in, first out
+- OPT or optimal
+- LRU or least recently used
+- LFU or least frequently used
 
+Working Set - the values adjacent to an indicated point, with a delta determining how far away (to the left), no repetition
 
-TO ADD
-Memory Scheduling Algorithms
-Working Set
-Various Formulas 
+Page Tables
+- Total space = 2^{num bits}
+- Page Number = num bits - page offset = first X bits
+- Page Offset = num bits - page number = last N - X bits
+- Number of Pages = 2^{page number}
+- Page Size = 2^(page offset)
+- Frame Size = 2^(page offset)
+- Pages Required = ceil(process size / page offset)
+- External Fragmentation = 0
+- Internal Fragmentation = (page offset * pages required) - process size
+- paged memory reference = 2 * memory reference/requested memory access
+- TLB, or Translation Lookaside Buffer works on the princple of locality to reduce access time for processes on the same page
+- TLB hit = memory reference + TLB access
+- TLB miss = memory reference + paged memory reference + TLB access
+- EMAT = %tlb_hit * time + %tlb_miss * time
