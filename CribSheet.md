@@ -71,14 +71,16 @@ tau = estimated burst time
 t = actual burst time  
 
 ##Multi Threading
-pthread_create()  
-- creates a new thread
-- passed four parameters, a thread ID, an attribute (typically null), a function to execute, and any arguments
-- returns 0 for success, and various other codes on error
-pthread_join()
-- make calling thread wait until specified thread terminates
-- passed two arguments, the thread and the value (typically null)
-- returns 0 on success, or other value on error
+- pthread_create()  
+  - creates a new thread
+  - passed four parameters, a thread ID, an attribute (typically null), a function to execute, and any arguments
+  - returns 0 for success, and various other codes on error  
+- pthread_join()
+  - make calling thread wait until specified thread terminates
+  - passed two arguments, the thread and the value (typically null)
+  - returns 0 on success, or other value on error  
+
+####BEWARE STATICALLY ALLOCATED VARIABLES
 
 ##Memory
 1 Kilobyte = 1024 Bytes  
@@ -89,10 +91,12 @@ Internal Fragmentation - when there is empty space within a block (non-dynamic o
 External Fragmentation - when blocks are free in memory, but too small to be used (dynamic allocation) 
 
 ####Contiguous Memory
+Subject to external fragmentation  
 Allocation Algorithms
 - First Fit
 - Best Fit
-- Next Fit
+- Next Fit  
+
 ####Noncontiguous Memory
 
 
